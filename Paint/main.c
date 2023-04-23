@@ -19,11 +19,19 @@ typedef struct{
 int qtd_pontos = 0;
 Ponto pontos[100];
 
+// Controle de pontos
+int ponto_inicial = 0;
+Ponto novo_ponto;
+
 //Vetor de retas
 int qtd_retas = 0;
 Reta retas[100];
 
-//Função para adicionar um ponto no vetor
+//Vetor de pontos
+int qtd_poligonos = 0;
+Ponto poligonos[100];
+
+//Fun  o para adicionar um ponto no vetor
 void addPontos(float x, float y){
     pontos[qtd_pontos].x = x;
     pontos[qtd_pontos].y = y;
@@ -33,7 +41,7 @@ void addPontos(float x, float y){
 
 }
 
-//Função para adicionar reta no vetor
+//Fun  o para adicionar reta no vetor
 void addReta(float x, float y, float x2, float y2){
     retas[qtd_retas].inicio.x = x;
     retas[qtd_retas].inicio.y = y;
@@ -42,6 +50,12 @@ void addReta(float x, float y, float x2, float y2){
     retas[qtd_retas].fim.y = y2;
 
     qtd_retas++;
+}
+//Funcao para adicionar poligonos no vetor
+void addPoligono(float x, float y){
+    poligonos[qtd_poligonos].x = x;
+    poligonos[qtd_poligonos].y = y;
+    qtd_poligonos++;
 }
 
 //Desenha todos os pontos do vetor
@@ -67,22 +81,61 @@ void desenhaReta(){
     glEnd();
 }
 
+//Desenha todas os poligonos do vetor
+void desenhaPoligono(){
+    glPointSize(5.0);
+    glBegin(GL_POLYGON);
+    for(int i = 0; i < qtd_poligonos; i++){
+        glColor3f(0,0,1);
+        glVertex2f(poligonos[i].x, poligonos[i].y);
+    }
+    glEnd();
+}
+
+int OP = 0;
 void getMouse(int button, int state, int x, int y){
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
-        POINT posiMouse;
-        GetCursorPos(&posiMouse);
-        addPontos((float)posiMouse.x, (float)posiMouse.y);
 
-        /*
-        int window_width = glutGet(GLUT_WINDOW_WIDTH);
-        int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+    if(OP == 1) {
+        if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
 
-        float window_x = ((float)x / (float)window_width - 0.5) * 2.0;
-        float window_y = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
+            int window_width = glutGet(GLUT_WINDOW_WIDTH);
+            int window_height = glutGet(GLUT_WINDOW_HEIGHT);
 
-        addPontos(window_x, window_y);
-        */
-        glutPostRedisplay();
+            float window_x = ((float)x / (float)window_width - 0.5) * 2.0;
+            float window_y = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
+
+            addPontos(window_x, window_y);
+            //glutPostRedisplay();
+        }
+    } else if(OP == 2) {
+        if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+            int window_width = glutGet(GLUT_WINDOW_WIDTH);
+            int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+
+            float window_x = ((float)x / (float)window_width - 0.5) * 2.0;
+            float window_y = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
+
+            if (ponto_inicial == 0) {
+                novo_ponto.x = window_x;
+                novo_ponto.y = window_y;
+                ponto_inicial = 1;
+            } else {
+                addReta(novo_ponto.x, novo_ponto.y, window_x, window_y);
+                ponto_inicial = 0;
+            }
+        }
+    } else if(OP == 3) {
+        if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+
+            int window_width = glutGet(GLUT_WINDOW_WIDTH);
+            int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+
+            float window_x = ((float)x / (float)window_width - 0.5) * 2.0;
+            float window_y = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
+
+            addPoligono(window_x, window_y);
+            //glutPostRedisplay();
+        }
     }
 }
 
@@ -93,6 +146,7 @@ void display (void){
 
     desenhaPonto();
     desenhaReta();
+    desenhaPoligono();
 
     glFlush();
 
@@ -107,6 +161,23 @@ void init (){
 
 }
 
+void menuFormas(int opcao) {
+    switch(opcao) {
+        case 1:
+            printf("Criando retas");
+            OP = 1;
+            break;
+        case 2:
+            printf("Criando linhas");
+            OP = 2;
+            break;
+        case 3:
+            printf("Criando poligonos");
+            OP = 3;
+            break;
+    }
+}
+
 int main(int argc, char** argv){
 
     glutInit(&argc,argv);
@@ -118,6 +189,14 @@ int main(int argc, char** argv){
     init();
     glutMouseFunc(getMouse);
     glutDisplayFunc(display);
+
+    //Cria menu
+    int menu;
+    menu = glutCreateMenu(menuFormas);
+    glutAddMenuEntry("Cria ponto", 1);
+    glutAddMenuEntry("Cria reta", 2);
+    glutAddMenuEntry("Cria poligono", 3);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
 
     glutMainLoop();
 
