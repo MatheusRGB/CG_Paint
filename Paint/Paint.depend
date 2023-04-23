@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1682212321 source:c:\users\matheus yago\desktop\cg\paint\main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<GL/glut.h>
+
