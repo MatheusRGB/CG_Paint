@@ -27,16 +27,17 @@ Ponto novo_ponto;
 int qtd_retas = 0;
 Reta retas[100];
 
-//Vetor de pontos
+//Vetor de poligonos
+int qtd_pontos_poligonos[100] = {0};
 int qtd_poligonos = 0;
-Ponto poligonos[100];
+Ponto poligonos[100][100];
 
 //Fun  o para adicionar um ponto no vetor
 void addPontos(float x, float y){
     pontos[qtd_pontos].x = x;
     pontos[qtd_pontos].y = y;
 
-    printf("Ponto adicionado %f", pontos[qtd_pontos].x);
+    printf("Ponto adicionado: (%.2f, %.2f)\n", pontos[qtd_pontos].x, pontos[qtd_pontos].y);
     qtd_pontos++;
 
 }
@@ -51,11 +52,16 @@ void addReta(float x, float y, float x2, float y2){
 
     qtd_retas++;
 }
+
 //Funcao para adicionar poligonos no vetor
 void addPoligono(float x, float y){
-    poligonos[qtd_poligonos].x = x;
-    poligonos[qtd_poligonos].y = y;
-    qtd_poligonos++;
+    poligonos[qtd_poligonos][qtd_pontos_poligonos[qtd_poligonos]].x = x;
+    poligonos[qtd_poligonos][qtd_pontos_poligonos[qtd_poligonos]].y = y;
+
+    printf("Poligono %d adicionado com ponto x: %.2f \n", qtd_poligonos, poligonos[qtd_poligonos][qtd_pontos_poligonos[qtd_poligonos]].x);
+
+    qtd_pontos_poligonos[qtd_poligonos]++;
+
 }
 
 //Desenha todos os pontos do vetor
@@ -84,17 +90,42 @@ void desenhaReta(){
 //Desenha todas os poligonos do vetor
 void desenhaPoligono(){
     glPointSize(5.0);
-    glBegin(GL_POLYGON);
+    //glBegin(GL_POLYGON);
     for(int i = 0; i < qtd_poligonos; i++){
-        glColor3f(0,0,1);
-        glVertex2f(poligonos[i].x, poligonos[i].y);
+        glBegin(GL_POLYGON);
+        for(int j = 0; j < qtd_pontos_poligonos[i]; j++){
+            glColor3f(0,0,1);
+            glVertex2f(poligonos[i][j].x, poligonos[i][j].y);
+        }
+        glEnd();
+
     }
-    glEnd();
+    //glEnd();
 }
 
 int OP = 0;
+float mousex, mousey;
 void getMouse(int button, int state, int x, int y){
+    if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        int window_width = glutGet(GLUT_WINDOW_WIDTH);
+        int window_height = glutGet(GLUT_WINDOW_HEIGHT);
 
+        mousex = ((float)x / (float)window_width - 0.5) * 2.0;
+        mousey = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
+    }
+    if(button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
+        if(OP == 0){
+            printf("(%.2f, %.2f)", mousex, mousey);
+        }
+        
+        if(OP == 3){
+             qtd_poligonos++;
+             printf("poligono criado com sucesso.\n");
+             OP = 0;
+        }else{
+            OP = 0;
+        }
+    }
     if(OP == 1) {
         if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
 
@@ -160,44 +191,189 @@ void init (){
 
 
 }
+float selecX;
+float selecY;
+int selecionaPonto(float px, float py, float mx, float my, float t) {
+    for(int i = 0; i < qtd_pontos; i++) {
+        if(mx <= pontos[i].x + t && mx >= pontos[i].x - t) {
+            if(my <= pontos[i].y + t && my >= pontos[i].y - t) {
+                printf("ponto selecionado: (%.2f, %.2f)\n", pontos[i].x, pontos[i].y);
+                selecX = pontos[i].x;
+                selecY = pontos[i].y;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+int intersec = 0;
+int selecionaPoligono() {
+    float mx = mousex;
+    float my = mousey;
+    float selectPoligon;
+
+    for(int i = 0; i < qtd_poligonos; i++){
+
+        for(int j = 0; j < qtd_pontos_poligonos[i]; j++){
+            for( int k = 0; k < qtd_pontos_poligonos[i]; k++){
+                if(((poligonos[i][j].x > mx && poligonos[i][k].x > mx) && ((poligonos[i][j].y > my && poligonos[i][k].y < my) || (poligonos[i][j].y < my && poligonos[i][k].y > my)))) {
+                    selectPoligon = i;
+                    //printf("Dentro, mouse: (%.2f, %.2f)\n", mx, my);
+                    intersec++;
+                }else{
+                    //printf("Fora do poligono mouse: (%.2f, %.2f)\n", mx, my);
+                    
+                }
+            }
+        }
+
+    }
+
+    int n_intersec = intersec/2;
+    intersec = 0;
+
+    if( (n_intersec) % 2 != 0){
+        printf("Dentro, %d", n_intersec);
+    }else{
+        printf("Fora, %d", n_intersec/2);
+    }
+    
+    return 0;
+   
+}
+
+void limparPontos() {
+    //selecionaPonto(pontos->x, pontos->y, mousex, mousey, 0.02);
+    //float aux = pontos->x;
+    Ponto newpontos[100];
+    int j = 0;
+    for (int i = 0; i < qtd_pontos; i++){
+        if ((pontos[i].x != selecX) && (pontos[i].y != selecY)){
+            newpontos[j].x = pontos[i].x;
+            newpontos[j].y = pontos[i].y;
+            j++;
+         }    
+    }
+
+    for(int i = 0; i < qtd_pontos; i++){
+        pontos[i].x = newpontos[i].x;
+        pontos[i].y = newpontos[i].y;
+    }
+    //free(pontos[qtd_pontos]);
+    qtd_pontos--;
+    //pontos->x = newpontos->x;
+    //pontos->y = newpontos->y;
+
+
+    glutPostRedisplay();
+}
+//MENUS
+void sair() {exit(0);}
+
+int verificaPonto;
+void menuSeleciona(int opcao) {
+        switch(opcao) {
+        case 1:
+            printf("mouse clicou em: (%.2f, %.2f)", mousex, mousey);
+		    verificaPonto = selecionaPonto(pontos->x, pontos->y, mousex, mousey, 0.02);
+            if(verificaPonto == 0) {
+                printf("Nao ha pontos no local selecionado.\n");
+            }
+            break;
+        case 2:
+            printf("Rotacionou\n");
+            break;
+        case 3:
+            selecionaPoligono();
+            break;
+    }
+}
 
 void menuFormas(int opcao) {
     switch(opcao) {
         case 1:
-            printf("Criando retas");
+            printf("Criando pontos\n");
             OP = 1;
             break;
         case 2:
-            printf("Criando linhas");
+            printf("Criando linhas\n");
             OP = 2;
             break;
         case 3:
-            printf("Criando poligonos");
+            printf("Criando poligonos\n");
             OP = 3;
             break;
     }
+}
+
+void menuTransformacao(int opcao) {
+        switch(opcao) {
+        case 1:
+            printf("Transladou\n");
+            break;
+        case 2:
+            printf("Rotacionou\n");
+            break;
+        case 3:
+            printf("Escalonou\n");
+            break;
+    }
+}
+void mainMenu(int valor) {
+	switch (valor)
+	{
+	case 0:
+		sair();
+		break;
+	case 1:
+		limparPontos();
+		break;
+	case 2:
+		//undo();
+		break;
+	case 3:
+
+		break;
+	}
+}
+
+void menu() {
+    int menu1 = glutCreateMenu(menuFormas);
+    glutAddMenuEntry("ponto", 1);
+    glutAddMenuEntry("reta", 2);
+    glutAddMenuEntry("poligono", 3);
+
+    int menu2 = glutCreateMenu(menuTransformacao);
+    glutAddMenuEntry("Transladar", 1);
+    glutAddMenuEntry("Rotacionar", 2);
+    glutAddMenuEntry("Escalonar", 3);
+
+    int menu3 = glutCreateMenu(menuSeleciona);
+    glutAddMenuEntry("ponto", 1);
+    glutAddMenuEntry("reta", 2);
+    glutAddMenuEntry("poligono", 3);
+
+    int menuMain = glutCreateMenu(mainMenu);
+    glutAddSubMenu("Selecionar", menu3);
+    glutAddSubMenu("Formas", menu1);
+	glutAddSubMenu("Transformacoes", menu2);
+	glutAddMenuEntry("Limpar", 1);
+	glutAddMenuEntry("Sair", 0);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
 int main(int argc, char** argv){
 
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_SINGLE| GLUT_RGB);
-    glutInitWindowSize(400,400);
+    glutInitWindowSize(500,500);
     glutInitWindowPosition(100,0);
     glutCreateWindow("Paint_2");
 
     init();
     glutMouseFunc(getMouse);
     glutDisplayFunc(display);
-
-    //Cria menu
-    int menu;
-    menu = glutCreateMenu(menuFormas);
-    glutAddMenuEntry("Cria ponto", 1);
-    glutAddMenuEntry("Cria reta", 2);
-    glutAddMenuEntry("Cria poligono", 3);
-    glutAttachMenu(GLUT_RIGHT_BUTTON);
-
+    menu();
     glutMainLoop();
 
     return 0;
