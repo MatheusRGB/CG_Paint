@@ -103,6 +103,7 @@ void desenhaPoligono(){
     //glEnd();
 }
 
+//Funçoes relacionadas com o mouse
 int OP = 0;
 float mousex, mousey;
 void getMouse(int button, int state, int x, int y){
@@ -117,7 +118,7 @@ void getMouse(int button, int state, int x, int y){
         if(OP == 0){
             printf("(%.2f, %.2f)", mousex, mousey);
         }
-        
+
         if(OP == 3){
              qtd_poligonos++;
              printf("poligono criado com sucesso.\n");
@@ -191,6 +192,7 @@ void init (){
 
 
 }
+//Função para selecionar um ponto.
 float selecX;
 float selecY;
 int selecionaPonto(float px, float py, float mx, float my, float t) {
@@ -206,66 +208,89 @@ int selecionaPonto(float px, float py, float mx, float my, float t) {
     }
     return 0;
 }
+//Função para selecionar um poligono, diz se está dentro ou fora.
 int intersec = 0;
+int selectPoligon;
+
 int selecionaPoligono() {
     float mx = mousex;
     float my = mousey;
-    float selectPoligon;
-
+    int aux = 0;
     for(int i = 0; i < qtd_poligonos; i++){
-
+        if(aux == 1){
+            break;
+        }
         for(int j = 0; j < qtd_pontos_poligonos[i]; j++){
             for( int k = 0; k < qtd_pontos_poligonos[i]; k++){
                 if(((poligonos[i][j].x > mx && poligonos[i][k].x > mx) && ((poligonos[i][j].y > my && poligonos[i][k].y < my) || (poligonos[i][j].y < my && poligonos[i][k].y > my)))) {
                     selectPoligon = i;
-                    //printf("Dentro, mouse: (%.2f, %.2f)\n", mx, my);
                     intersec++;
-                }else{
-                    //printf("Fora do poligono mouse: (%.2f, %.2f)\n", mx, my);
-                    
+
+                    if(((intersec/2) % 2 != 0) && (j+1 == qtd_pontos_poligonos[i])){
+                        aux = 1;
+                    }
                 }
             }
         }
-
     }
 
     int n_intersec = intersec/2;
     intersec = 0;
 
     if( (n_intersec) % 2 != 0){
-        printf("Dentro, %d", n_intersec);
+        printf("Dentro, poligono %d\n",selectPoligon);
     }else{
-        printf("Fora, %d", n_intersec/2);
+        printf("Fora\n");
     }
-    
-    return 0;
-   
-}
 
+    return 0;
+
+}
+//Função para apagar um ponto
 void limparPontos() {
-    //selecionaPonto(pontos->x, pontos->y, mousex, mousey, 0.02);
-    //float aux = pontos->x;
     Ponto newpontos[100];
     int j = 0;
+
     for (int i = 0; i < qtd_pontos; i++){
         if ((pontos[i].x != selecX) && (pontos[i].y != selecY)){
             newpontos[j].x = pontos[i].x;
             newpontos[j].y = pontos[i].y;
             j++;
-         }    
+         }
     }
 
     for(int i = 0; i < qtd_pontos; i++){
         pontos[i].x = newpontos[i].x;
         pontos[i].y = newpontos[i].y;
     }
-    //free(pontos[qtd_pontos]);
+
     qtd_pontos--;
-    //pontos->x = newpontos->x;
-    //pontos->y = newpontos->y;
-
-
     glutPostRedisplay();
+}
+
+void apagarPoligono(){
+    Ponto newpoligono[100][100];
+    int j = 0;
+
+    for(int i = 0; i < qtd_poligonos; i++){
+        for(int j = 0; j < qtd_pontos_poligonos[i]; j++){
+            if(i!= selectPoligon){
+                newpoligono[j][qtd_pontos_poligonos[j]].x = poligonos[qtd_poligonos][qtd_pontos_poligonos[qtd_poligonos]].x;
+                newpoligono[j][qtd_pontos_poligonos[j]].y = poligonos[qtd_poligonos][qtd_pontos_poligonos[qtd_poligonos]].y;
+            }
+        }
+    }
+
+    for(int i = 0; i < qtd_poligonos; i++){
+        for(int j = 0; j < qtd_pontos_poligonos[i]; j++){
+                newpoligono[qtd_poligonos][qtd_pontos_poligonos[j]].x = poligonos[qtd_poligonos][qtd_pontos_poligonos[qtd_poligonos]].x;
+                newpoligono[qtd_poligonos][qtd_pontos_poligonos[j]].y = poligonos[qtd_poligonos][qtd_pontos_poligonos[qtd_poligonos]].y;
+        }
+    }
+
+    //qtd_poligonos--;
+    qtd_pontos_poligonos[selectPoligon] = 0;
+
 }
 //MENUS
 void sair() {exit(0);}
@@ -326,10 +351,11 @@ void mainMenu(int valor) {
 		sair();
 		break;
 	case 1:
-		limparPontos();
+		//limparPontos();
+		apagarPoligono();
 		break;
 	case 2:
-		//undo();
+
 		break;
 	case 3:
 
@@ -355,7 +381,7 @@ void menu() {
 
     int menuMain = glutCreateMenu(mainMenu);
     glutAddSubMenu("Selecionar", menu3);
-    glutAddSubMenu("Formas", menu1);
+    glutAddSubMenu("Desenhar", menu1);
 	glutAddSubMenu("Transformacoes", menu2);
 	glutAddMenuEntry("Limpar", 1);
 	glutAddMenuEntry("Sair", 0);
