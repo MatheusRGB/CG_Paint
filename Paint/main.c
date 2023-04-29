@@ -104,15 +104,21 @@ void desenhaPoligono(){
 }
 
 //Funçoes relacionadas com o mouse
-int OP = 0;
-float mousex, mousey;
+int OP = 0, mousepressionado = 0;
+float mousex, mousey, transX, transY;
+
 void getMouse(int button, int state, int x, int y){
     if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        mousepressionado = 1;
         int window_width = glutGet(GLUT_WINDOW_WIDTH);
         int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+        transX = ((float)x / (float)window_width - 0.5) * 2.0;
+        transY = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
 
         mousex = ((float)x / (float)window_width - 0.5) * 2.0;
         mousey = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
+    } else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+        mousepressionado = 0;
     }
     if(button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
         if(OP == 0){
@@ -168,6 +174,15 @@ void getMouse(int button, int state, int x, int y){
             addPoligono(window_x, window_y);
             //glutPostRedisplay();
         }
+    }
+}
+void motion_callback(int x, int y) {
+    if(mousepressionado == 1) {
+        int window_width = glutGet(GLUT_WINDOW_WIDTH);
+        int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+        transX = ((float)x / (float)window_width - 0.5) * 2.0;
+        transY = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
+
     }
 }
 
@@ -246,9 +261,24 @@ int selecionaPoligono() {
     return 0;
 
 }
-
+//função para transladar um ponto (NAO ESTA FUNCIONANDO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
 void transPonto() {
-    
+    //int verifica = selecionaPonto(pontos->x, pontos->y, mousex, mousey, 0.02);
+    Ponto newponto[100];
+    int j = 0;
+
+    for (int i = 0; i < qtd_pontos; i++){
+        if ((pontos[i].x == selecX) && (pontos[i].y == selecY)){
+            newponto[j].x = pontos[i].x + transX;
+            newponto[j].y = pontos[i].y + transY;
+            j++;
+        }
+    }
+    for(int i = 0; i < qtd_pontos; i++){
+        pontos[i].x = newponto[i].x;
+        pontos[i].y = newponto[i].y;
+    }
+    glutPostRedisplay();
 }
 
 //Função para apagar um ponto
@@ -339,6 +369,7 @@ void menuFormas(int opcao) {
 void menuTransladar(int opcao) {
         switch(opcao) {
         case 1:
+            transPonto();
             printf("Transladou o ponto\n");
             break;
         case 2:
@@ -453,6 +484,7 @@ int main(int argc, char** argv){
 
     init();
     glutMouseFunc(getMouse);
+    glutMotionFunc(motion_callback);
     glutDisplayFunc(display);
     menu();
     glutMainLoop();
