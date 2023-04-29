@@ -246,6 +246,11 @@ int selecionaPoligono() {
     return 0;
 
 }
+
+void transPonto() {
+    
+}
+
 //Função para apagar um ponto
 void limparPontos() {
     Ponto newpontos[100];
@@ -306,7 +311,7 @@ void menuSeleciona(int opcao) {
             }
             break;
         case 2:
-            printf("Rotacionou\n");
+            printf("Selecionou a reta\n");
             break;
         case 3:
             selecionaPoligono();
@@ -331,19 +336,56 @@ void menuFormas(int opcao) {
     }
 }
 
-void menuTransformacao(int opcao) {
+void menuTransladar(int opcao) {
         switch(opcao) {
         case 1:
-            printf("Transladou\n");
+            printf("Transladou o ponto\n");
             break;
         case 2:
-            printf("Rotacionou\n");
+            printf("Transladou a reta\n");
             break;
         case 3:
-            printf("Escalonou\n");
+            printf("Transladou o poligono\n");
             break;
     }
 }
+void menuRotacionar(int opcao) {
+        switch(opcao) {
+        case 1:
+            printf("Rotacionou a reta\n");
+            break;
+        case 2:
+            printf("Rotacionou o poligono\n");
+            break;
+    }
+}
+void menuEscalonar(int opcao) {
+        switch(opcao) {
+        case 1:
+            printf("Escalonou a reta\n");
+            break;
+        case 2:
+            printf("Escalonou o poligono\n");
+            break;
+    }
+}
+
+void menuApaga(int opcao) {
+        switch(opcao) {
+        case 1:
+            limparPontos();
+            printf("Apagou o ponto\n");
+            break;
+        case 2:
+            printf("Apagou a reta\n");
+            break;
+        case 3:
+            apagarPoligono();
+            printf("Apagou o poligono\n");
+            break;
+    }
+}
+
 void mainMenu(int valor) {
 	switch (valor)
 	{
@@ -351,8 +393,6 @@ void mainMenu(int valor) {
 		sair();
 		break;
 	case 1:
-		//limparPontos();
-		apagarPoligono();
 		break;
 	case 2:
 
@@ -369,12 +409,25 @@ void menu() {
     glutAddMenuEntry("reta", 2);
     glutAddMenuEntry("poligono", 3);
 
-    int menu2 = glutCreateMenu(menuTransformacao);
-    glutAddMenuEntry("Transladar", 1);
-    glutAddMenuEntry("Rotacionar", 2);
-    glutAddMenuEntry("Escalonar", 3);
+    int menu2 = glutCreateMenu(menuTransladar);
+    glutAddMenuEntry("ponto", 1);
+    glutAddMenuEntry("reta", 2);
+    glutAddMenuEntry("poligono", 3);
 
     int menu3 = glutCreateMenu(menuSeleciona);
+    glutAddMenuEntry("ponto", 1);
+    glutAddMenuEntry("reta", 2);
+    glutAddMenuEntry("poligono", 3);
+
+    int menu4 = glutCreateMenu(menuRotacionar);
+    glutAddMenuEntry("reta", 1);
+    glutAddMenuEntry("poligono", 2);
+
+    int menu5 = glutCreateMenu(menuEscalonar);
+    glutAddMenuEntry("reta", 1);
+    glutAddMenuEntry("poligono", 2);
+
+    int menu6 = glutCreateMenu(menuApaga);
     glutAddMenuEntry("ponto", 1);
     glutAddMenuEntry("reta", 2);
     glutAddMenuEntry("poligono", 3);
@@ -382,8 +435,10 @@ void menu() {
     int menuMain = glutCreateMenu(mainMenu);
     glutAddSubMenu("Selecionar", menu3);
     glutAddSubMenu("Desenhar", menu1);
-	glutAddSubMenu("Transformacoes", menu2);
-	glutAddMenuEntry("Limpar", 1);
+    glutAddSubMenu("Transladar", menu2);
+    glutAddSubMenu("Rotacionar", menu4);
+    glutAddSubMenu("Escalonar", menu5);
+	glutAddSubMenu("Apagar", menu6);
 	glutAddMenuEntry("Sair", 0);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
