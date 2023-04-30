@@ -67,7 +67,7 @@ void desenhaPonto(){
 
 //Desenha todas as retas do vetor
 void desenhaReta(){
-    glLineWidth(2.0);
+    glLineWidth(3.0);
     glBegin(GL_LINES);
     for(int i = 0; i < qtd_retas; i++){
         glColor3f(0,1,0);
@@ -96,6 +96,8 @@ void desenhaPoligono(){
 //Funçoes relacionadas com o mouse
 int OP = 0, mousepressionado = 0;
 float mousex, mousey, transX, transY;
+int selectPoligon;
+int selecReta;
 void getMouse(int button, int state, int x, int y){
     if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         mousepressionado = 1;
@@ -116,11 +118,14 @@ void getMouse(int button, int state, int x, int y){
     if(button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
         if(OP == 0){
             printf("(%.2f, %.2f)", mousex, mousey);
+            selectPoligon = -1;
+            selecReta = -1;
         }
 
         if(OP == 3){
              qtd_poligonos++;
              printf("poligono criado com sucesso.\n");
+             selectPoligon = -1;
              OP = 0;
         }else{
             OP = 0;
@@ -198,10 +203,12 @@ void teclado(int key, int x, int y) {
     case GLUT_KEY_RIGHT:
         fatR = -0.4;
         Rotpoli();
+        Rotreta();
         break;
     case GLUT_KEY_LEFT:
         fatR = 0.4;
         Rotpoli();
+        Rotreta();
         break;
     case GLUT_KEY_INSERT:
         TransPoli();
@@ -252,7 +259,7 @@ int selecionaPonto() {
     }
     return 0;
 }
-int selecReta;
+
 int selecionaReta() {
     float mx = mousex;
     float my = mousey;
@@ -264,6 +271,8 @@ int selecionaReta() {
                 selecReta = i;
                 return 1;
             }
+        }else{
+            //outro caso
         }
     }
     return 0;
@@ -271,8 +280,6 @@ int selecionaReta() {
 
 //Função para selecionar um poligono, diz se está dentro ou fora.
 int intersec = 0;
-int selectPoligon;
-
 int selecionaPoligono() {
     float mx = mousex;
     float my = mousey;
@@ -349,7 +356,7 @@ void transPonto() {
 void transReta() {
     float centroideX = 0;
     float centroideY = 0;
-    
+
     centroideX = centroideX + retas[selecReta].inicio.x + retas[selecReta].fim.x;
     centroideY = centroideY + retas[selecReta].inicio.y + retas[selecReta].fim.y;
 
@@ -358,7 +365,7 @@ void transReta() {
 
     int window_width = glutGet(GLUT_WINDOW_WIDTH);
     int window_height = glutGet(GLUT_WINDOW_HEIGHT);
-    
+
     for (int i = 0; i < qtd_retas; i++){
 
         if (i == selecReta){
@@ -489,7 +496,7 @@ void TransPoli(){
 void Escalreta() {
     float centroideX = 0;
     float centroideY = 0;
-        int window_width = glutGet(GLUT_WINDOW_WIDTH);
+    int window_width = glutGet(GLUT_WINDOW_WIDTH);
     int window_height = glutGet(GLUT_WINDOW_HEIGHT);
     centroideX = centroideX + retas[selecReta].inicio.x + retas[selecReta].fim.x;
     centroideY = centroideY + retas[selecReta].inicio.y + retas[selecReta].fim.y;
@@ -500,8 +507,8 @@ void Escalreta() {
     for (int i = 0; i < qtd_retas; i++){
 
         if (i == selecReta){
-            float offX = transX - centroideX;
-            float offY = transY - centroideY;
+            float offX = centroideX;
+            float offY = centroideY;
 
            float MatrizT[3][3] = {
            {1,0,offX},
@@ -593,7 +600,7 @@ void Escalreta() {
 
             retas[selecReta].inicio.x = (MatrizRI[0][0]);
             retas[selecReta].inicio.y = (MatrizRI[1][0]);
-            
+
             retas[selecReta].fim.x = (MatrizRF[0][0]);
             retas[selecReta].fim.y = (MatrizRF[1][0]);
             glutPostRedisplay();
@@ -601,6 +608,8 @@ void Escalreta() {
     }
 
 }
+
+
 
 // FUNCAO DE ESCALA DO POLIGONO
 void Escalpoli(){
@@ -681,6 +690,133 @@ void Escalpoli(){
             glutPostRedisplay();
     }
 }
+
+
+void Rotreta(){
+    float centroideX = 0;
+    float centroideY = 0;
+    int window_width = glutGet(GLUT_WINDOW_WIDTH);
+    int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+    centroideX = centroideX + retas[selecReta].inicio.x + retas[selecReta].fim.x;
+    centroideY = centroideY + retas[selecReta].inicio.y + retas[selecReta].fim.y;
+
+    centroideX = (centroideX/2);
+    centroideY = (centroideY/2);
+
+    for (int i = 0; i < qtd_retas; i++){
+
+        if (i == selecReta){
+            float offX = centroideX;
+            float offY = centroideY;
+
+           float MatrizT[3][3] = {
+           {1,0,offX},
+           {0,1,offY},
+           {0,0,   1}
+           };
+
+           float MatrizV[3][3] = {
+           {1,0,-offX},
+           {0,1,-offY},
+           {0,0,    1}
+           };
+
+           float MatrizE[3][3] = {
+           {cos(fatR),-sin(fatR),   0},
+           {sin(fatR), cos(fatR),   0},
+           {0        ,0         ,   1}
+           };
+
+           float MatrizP[3][1] = {
+           {retas[selecReta].inicio.x},
+           {retas[selecReta].inicio.y},
+           {     1    }
+           };
+
+           float MatrizP2[3][1] = {
+           {retas[selecReta].fim.x},
+           {retas[selecReta].fim.y},
+           {     1    }
+           };
+
+           float MatrizRI[3][1];
+           float MatrizRI2[3][3];
+           float MatrizRI3[3][3];
+
+           float MatrizRF[3][1];
+           float MatrizRF2[3][3];
+           float MatrizRF3[3][3];
+
+            //para o primeiro ponto da reta
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizRI2[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRI2[i][j] += MatrizT[i][k] * MatrizE[k][j];
+                    }
+                }
+            }
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizRI3[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRI3[i][j] += MatrizRI2[i][k] * MatrizV[k][j];
+                    }
+                }
+            }
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 1; j++) {
+                    MatrizRI[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRI[i][j] += MatrizRI3[i][k] * MatrizP[k][j];
+                    }
+                }
+            }
+
+            //para o segundo ponto da reta
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizRF2[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRF2[i][j] += MatrizT[i][k] * MatrizE[k][j];
+                    }
+                }
+            }
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizRF3[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRF3[i][j] += MatrizRF2[i][k] * MatrizV[k][j];
+                    }
+                }
+            }
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 1; j++) {
+                    MatrizRF[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRF[i][j] += MatrizRF3[i][k] * MatrizP2[k][j];
+                    }
+                }
+            }
+
+            retas[selecReta].inicio.x = (MatrizRI[0][0]);
+            retas[selecReta].inicio.y = (MatrizRI[1][0]);
+
+            retas[selecReta].fim.x = (MatrizRF[0][0]);
+            retas[selecReta].fim.y = (MatrizRF[1][0]);
+            glutPostRedisplay();
+        }
+    }
+
+
+
+}
+
+
 // FUNCAO DE ROTACAO DO POLIGONO
 void Rotpoli(){
     float centroideX = 0;
@@ -797,7 +933,7 @@ void apagarReta() {
             newretas[j].fim.x = retas[i].fim.x;
             newretas[j].fim.y = retas[i].fim.y;
             j++;
-        }    
+        }
     }
     for(int i = 0; i < qtd_retas; i++){
         retas[i].inicio.x = newretas[i].inicio.x;
