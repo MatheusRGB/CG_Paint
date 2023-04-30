@@ -107,6 +107,7 @@ void getMouse(int button, int state, int x, int y){
         mousex = ((float)x / (float)window_width - 0.5) * 2.0;
         mousey = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
         selecionaPonto();
+        selecionaReta();
         selecionaPoligono();
     } else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
         mousepressionado = 0;
@@ -219,6 +220,9 @@ void GerenciaTeclado(unsigned char key, int x, int y) {
         if(selecionaPoligono() == 0) {
             apagarPoligono();
         }
+        if(selecionaReta() == 1) {
+            apagarReta();
+        }
         break;
     default:
         break;
@@ -239,6 +243,22 @@ int selecionaPonto() {
                 printf("ponto selecionado: (%.2f, %.2f)\n", pontos[i].x, pontos[i].y);
                 selecX = pontos[i].x;
                 selecY = pontos[i].y;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+int selecReta;
+int selecionaReta() {
+    float mx = mousex;
+    float my = mousey;
+    float t = 0.01;
+    for(int i = 0; i < qtd_retas; i++) {
+        if((mx <= retas[i].inicio.x + t && mx >= retas[i].inicio.x - t) || (mx <= retas[i].fim.x + t && mx >= retas[i].fim.x - t)) {
+            if((my <= retas[i].inicio.y + t && my >= retas[i].inicio.y - t) || (my <= retas[i].fim.y + t && my >= retas[i].fim.y - t)) {
+                printf("reta selecionada: (%.2f, %.2f) ate (%.2f, %.2f)\n", retas[i].inicio.x, retas[i].inicio.y, retas[i].fim.x, retas[i].fim.y);
+                selecReta = i;
                 return 1;
             }
         }
@@ -575,6 +595,29 @@ void limparPontos() {
     }
 
     qtd_pontos--;
+    glutPostRedisplay();
+}
+
+void apagarReta() {
+    Reta newretas[100];
+    int j = 0;
+
+    for(int i = 0; i < qtd_retas; i++) {
+        if(i != selecReta) {
+            newretas[j].inicio.x = retas[i].inicio.x;
+            newretas[j].inicio.y = retas[i].inicio.y;
+            newretas[j].fim.x = retas[i].fim.x;
+            newretas[j].fim.y = retas[i].fim.y;
+            j++;
+        }    
+    }
+    for(int i = 0; i < qtd_retas; i++){
+        retas[i].inicio.x = newretas[i].inicio.x;
+        retas[i].inicio.y = newretas[i].inicio.y;
+        retas[i].fim.x = newretas[i].fim.x;
+        retas[i].fim.y = newretas[i].fim.y;
+    }
+    qtd_retas--;
     glutPostRedisplay();
 }
 
