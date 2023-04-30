@@ -117,6 +117,9 @@ void getMouse(int button, int state, int x, int y){
 
         mousex = ((float)x / (float)window_width - 0.5) * 2.0;
         mousey = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
+        selecionaPonto();
+        selecionaPoligono();
+
     } else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
         mousepressionado = 0;
     }
@@ -210,7 +213,10 @@ void init (){
 //Função para selecionar um ponto.
 float selecX;
 float selecY;
-int selecionaPonto(float px, float py, float mx, float my, float t) {
+int selecionaPonto() {
+    float mx = mousex;
+    float my = mousey;
+    float t = 0.2;
     for(int i = 0; i < qtd_pontos; i++) {
         if(mx <= pontos[i].x + t && mx >= pontos[i].x - t) {
             if(my <= pontos[i].y + t && my >= pontos[i].y - t) {
@@ -257,8 +263,6 @@ int selecionaPoligono() {
 
     if( (n_intersec) % 2 != 0){
         printf("Dentro, poligono %d\n",selectPoligon);
-    }else{
-        printf("Fora\n");
     }
 
     return 0;
@@ -613,25 +617,6 @@ void teclado(int key, int x, int y) {
 //MENUS
 void sair() {exit(0);}
 
-int verificaPonto;
-void menuSeleciona(int opcao) {
-        switch(opcao) {
-        case 1:
-            printf("mouse clicou em: (%.2f, %.2f)", mousex, mousey);
-		    verificaPonto = selecionaPonto(pontos->x, pontos->y, mousex, mousey, 0.02);
-            if(verificaPonto == 0) {
-                printf("Nao ha pontos no local selecionado.\n");
-            }
-            break;
-        case 2:
-            printf("Selecionou a reta\n");
-            break;
-        case 3:
-            selecionaPoligono();
-            break;
-    }
-}
-
 void menuFormas(int opcao) {
     switch(opcao) {
         case 1:
@@ -661,28 +646,6 @@ void menuTransladar(int opcao) {
         case 3:
             TransPoli();
             printf("Transladou o poligono\n");
-            break;
-    }
-}
-void menuRotacionar(int opcao) {
-        switch(opcao) {
-        case 1:
-            printf("Rotacionou a reta\n");
-            break;
-        case 2:
-            Rotpoli();
-            printf("Rotacionou o poligono\n");
-            break;
-    }
-}
-void menuEscalonar(int opcao) {
-        switch(opcao) {
-        case 1:
-            printf("Escalonou a reta\n");
-            break;
-        case 2:
-            Escalpoli();
-            printf("Escalonou o poligono\n");
             break;
     }
 }
@@ -731,30 +694,14 @@ void menu() {
     glutAddMenuEntry("reta", 2);
     glutAddMenuEntry("poligono", 3);
 
-    int menu3 = glutCreateMenu(menuSeleciona);
-    glutAddMenuEntry("ponto", 1);
-    glutAddMenuEntry("reta", 2);
-    glutAddMenuEntry("poligono", 3);
-
-    int menu4 = glutCreateMenu(menuRotacionar);
-    glutAddMenuEntry("reta", 1);
-    glutAddMenuEntry("poligono", 2);
-
-    int menu5 = glutCreateMenu(menuEscalonar);
-    glutAddMenuEntry("reta", 1);
-    glutAddMenuEntry("poligono", 2);
-
     int menu6 = glutCreateMenu(menuApaga);
     glutAddMenuEntry("ponto", 1);
     glutAddMenuEntry("reta", 2);
     glutAddMenuEntry("poligono", 3);
 
     int menuMain = glutCreateMenu(mainMenu);
-    glutAddSubMenu("Selecionar", menu3);
     glutAddSubMenu("Desenhar", menu1);
     glutAddSubMenu("Transladar", menu2);
-    glutAddSubMenu("Rotacionar", menu4);
-    glutAddSubMenu("Escalonar", menu5);
 	glutAddSubMenu("Apagar", menu6);
 	glutAddMenuEntry("Sair", 0);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
