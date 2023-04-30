@@ -187,10 +187,12 @@ void teclado(int key, int x, int y) {
     {
     case GLUT_KEY_UP:
         fatE = 1.1;
+        Escalreta();
         Escalpoli();
         break;
     case GLUT_KEY_DOWN:
         fatE = 0.9;
+        Escalreta();
         Escalpoli();
         break;
     case GLUT_KEY_RIGHT:
@@ -203,6 +205,7 @@ void teclado(int key, int x, int y) {
         break;
     case GLUT_KEY_INSERT:
         TransPoli();
+        transReta();
         break;
     default:
         break;
@@ -341,6 +344,74 @@ void transPonto() {
         }
     }
 }
+
+//FUNCAO DE TRANSLACAO DA RETA
+void transReta() {
+    float centroideX = 0;
+    float centroideY = 0;
+    
+    centroideX = centroideX + retas[selecReta].inicio.x + retas[selecReta].fim.x;
+    centroideY = centroideY + retas[selecReta].inicio.y + retas[selecReta].fim.y;
+
+    centroideX = (centroideX/2);
+    centroideY = (centroideY/2);
+
+    int window_width = glutGet(GLUT_WINDOW_WIDTH);
+    int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+    
+    for (int i = 0; i < qtd_retas; i++){
+
+        if (i == selecReta){
+            float offX = transX - centroideX;
+            float offY = transY - centroideY;
+
+           float MatrizT[3][3] = {
+           {1,0,offX},
+           {0,1,offY},
+           {0,0,   1}
+           };
+
+           float MatrizP[3][1] = {
+           {retas[selecReta].inicio.x},
+           {retas[selecReta].inicio.y},
+           {     1    }
+           };
+           float MatrizP2[3][1] = {
+           {retas[selecReta].fim.x},
+           {retas[selecReta].fim.y},
+           {     1    }
+           };
+
+           float MatrizR[3][1];
+           float MatrizR2[3][1];
+           for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 1; j++) {
+                    MatrizR[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizR[i][j] += MatrizT[i][k] * MatrizP[k][j];
+                    }
+                }
+            }
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 1; j++) {
+                    MatrizR2[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizR2[i][j] += MatrizT[i][k] * MatrizP2[k][j];
+                    }
+                }
+            }
+
+            retas[selecReta].inicio.x = MatrizR[0][0];
+            retas[selecReta].inicio.y = MatrizR[1][0];
+
+            retas[selecReta].fim.x = MatrizR2[0][0];
+            retas[selecReta].fim.y = MatrizR2[1][0];
+            glutPostRedisplay();
+        }
+    }
+
+}
+
 // FUNCAO DE TRANSLAÇAO DO POLIGONO
 void TransPoli(){
 
@@ -413,8 +484,125 @@ void TransPoli(){
             glutPostRedisplay();
     }
 }
-// FUNCAO DE ESCALA DO POLIGONO
 
+// FUNCAO DE ESCALA DA RETA
+void Escalreta() {
+    float centroideX = 0;
+    float centroideY = 0;
+        int window_width = glutGet(GLUT_WINDOW_WIDTH);
+    int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+    centroideX = centroideX + retas[selecReta].inicio.x + retas[selecReta].fim.x;
+    centroideY = centroideY + retas[selecReta].inicio.y + retas[selecReta].fim.y;
+
+    centroideX = (centroideX/2);
+    centroideY = (centroideY/2);
+
+    for (int i = 0; i < qtd_retas; i++){
+
+        if (i == selecReta){
+            float offX = transX - centroideX;
+            float offY = transY - centroideY;
+
+           float MatrizT[3][3] = {
+           {1,0,offX},
+           {0,1,offY},
+           {0,0,   1}
+           };
+           float MatrizV[3][3] = {
+           {1,0,-offX},
+           {0,1,-offY},
+           {0,0,    1}
+           };
+           float MatrizE[3][3] = {
+           {fatE  ,0   ,   0},
+           {  0   ,fatE,   0},
+           {0     ,0   ,   1}
+           };
+           float MatrizP[3][1] = {
+           {retas[selecReta].inicio.x},
+           {retas[selecReta].inicio.y},
+           {     1    }
+           };
+           float MatrizP2[3][1] = {
+           {retas[selecReta].fim.x},
+           {retas[selecReta].fim.y},
+           {     1    }
+           };
+
+           float MatrizRI[3][1];
+           float MatrizRI2[3][3];
+           float MatrizRI3[3][3];
+
+           float MatrizRF[3][1];
+           float MatrizRF2[3][3];
+           float MatrizRF3[3][3];
+            //para o primeiro ponto da reta
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizRI2[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRI2[i][j] += MatrizT[i][k] * MatrizE[k][j];
+                    }
+                }
+            }
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizRI3[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRI3[i][j] += MatrizRI2[i][k] * MatrizV[k][j];
+                    }
+                }
+            }
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 1; j++) {
+                    MatrizRI[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRI[i][j] += MatrizRI3[i][k] * MatrizP[k][j];
+                    }
+                }
+            }
+            //para o segundo ponto da reta
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizRF2[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRF2[i][j] += MatrizT[i][k] * MatrizE[k][j];
+                    }
+                }
+            }
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizRF3[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRF3[i][j] += MatrizRF2[i][k] * MatrizV[k][j];
+                    }
+                }
+            }
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 1; j++) {
+                    MatrizRF[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizRF[i][j] += MatrizRF3[i][k] * MatrizP2[k][j];
+                    }
+                }
+            }
+
+            retas[selecReta].inicio.x = (MatrizRI[0][0]);
+            retas[selecReta].inicio.y = (MatrizRI[1][0]);
+            
+            retas[selecReta].fim.x = (MatrizRF[0][0]);
+            retas[selecReta].fim.y = (MatrizRF[1][0]);
+            glutPostRedisplay();
+        }
+    }
+
+}
+
+// FUNCAO DE ESCALA DO POLIGONO
 void Escalpoli(){
     float centroideX = 0;
     float centroideY = 0;
