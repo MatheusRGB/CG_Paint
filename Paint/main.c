@@ -107,7 +107,6 @@ void desenhaPoligono(){
 //Funçoes relacionadas com o mouse
 int OP = 0, mousepressionado = 0;
 float mousex, mousey, transX, transY;
-
 void getMouse(int button, int state, int x, int y){
     if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         mousepressionado = 1;
@@ -374,7 +373,7 @@ void TransPoli(){
             glutPostRedisplay();
     }
 }
-
+float fatE;
 void Escalpoli(){
     float centroideX = 0;
     float centroideY = 0;
@@ -406,8 +405,8 @@ void Escalpoli(){
            };
 
         float MatrizE[3][3] = {
-           {1.5  ,0   ,   0},
-           {  0   ,1.5,   0},
+           {fatE  ,0   ,   0},
+           {  0   ,fatE,   0},
            {0     ,0   ,   1}
            };
 
@@ -453,7 +452,7 @@ void Escalpoli(){
             glutPostRedisplay();
     }
 }
-
+float fatR;
 void Rotpoli(){
     float centroideX = 0;
     float centroideY = 0;
@@ -485,8 +484,8 @@ void Rotpoli(){
            };
 
         float MatrizRT[3][3] = {
-           {cos(10)  ,-sin(10),   0},
-           {sin(10)  ,cos(10),    0},
+           {cos(fatR)  ,-sin(fatR),   0},
+           {sin(fatR)  ,cos(fatR),    0},
            {0        ,0      ,    1}
            };
 
@@ -586,6 +585,30 @@ void apagarPoligono(){
     qtd_pontos_poligonos[selectPoligon] = 0;
     glutPostRedisplay();
 
+}
+void teclado(int key, int x, int y) {
+    switch (key)
+    {
+    case GLUT_KEY_UP:
+        fatE = 1.1;
+        Escalpoli();
+        break;
+    case GLUT_KEY_DOWN:
+        fatE = 0.9;
+        Escalpoli();
+        break;
+    case GLUT_KEY_RIGHT:
+        fatR = -0.4;
+        Rotpoli();
+        break;
+    case GLUT_KEY_LEFT:
+        fatR = 0.4;
+        Rotpoli();
+        break;
+    default:
+        break;
+    }
+    glutPostRedisplay();
 }
 //MENUS
 void sair() {exit(0);}
@@ -748,6 +771,7 @@ int main(int argc, char** argv){
     init();
     glutMouseFunc(getMouse);
     glutMotionFunc(motion_callback);
+    glutSpecialFunc(teclado);
     glutDisplayFunc(display);
     menu();
     glutMainLoop();
