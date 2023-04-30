@@ -3,18 +3,7 @@
 #include <windows.h>
 #include <GL/glut.h>
 #include <math.h>
-
-//Estrutura do ponto
-typedef struct{
-    float x;
-    float y;
-}Ponto;
-
-//Estrutura da Reta
-typedef struct{
-    Ponto inicio;
-    Ponto fim;
-}Reta;
+#include "paint.h"
 
 //Vetor de pontos
 int qtd_pontos = 0;
@@ -119,9 +108,9 @@ void getMouse(int button, int state, int x, int y){
         mousey = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
         selecionaPonto();
         selecionaPoligono();
-
     } else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
         mousepressionado = 0;
+        transPonto();
     }
     if(button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
         if(OP == 0){
@@ -179,6 +168,7 @@ void getMouse(int button, int state, int x, int y){
         }
     }
 }
+// FUNCAO PARA VERIFICAR SE O MOUSE ESTA PRESSIONADO
 void motion_callback(int x, int y) {
     if(mousepressionado == 1) {
         int window_width = glutGet(GLUT_WINDOW_WIDTH);
@@ -188,35 +178,61 @@ void motion_callback(int x, int y) {
 
     }
 }
-
-void display (void){
-    glClear(GL_COLOR_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    desenhaPonto();
-    desenhaReta();
-    desenhaPoligono();
-
-    glFlush();
-
+// FUNCIONALIDADE DE TECLAS ESPECIAIS DO TECLADO
+float fatE;
+float fatR;
+void teclado(int key, int x, int y) {
+    switch (key)
+    {
+    case GLUT_KEY_UP:
+        fatE = 1.1;
+        Escalpoli();
+        break;
+    case GLUT_KEY_DOWN:
+        fatE = 0.9;
+        Escalpoli();
+        break;
+    case GLUT_KEY_RIGHT:
+        fatR = -0.4;
+        Rotpoli();
+        break;
+    case GLUT_KEY_LEFT:
+        fatR = 0.4;
+        Rotpoli();
+        break;
+    case GLUT_KEY_INSERT:
+        TransPoli();
+        break;
+    default:
+        break;
+    }
+    glutPostRedisplay();
+}
+// FUNCIONALIDADE DAS TECLAS
+void GerenciaTeclado(unsigned char key, int x, int y) {
+    switch (key)
+    {
+    case 127: // VALOR ASCII DA TECLA DELETE
+        if(selecionaPonto() == 1) {
+            limparPontos();
+        }
+        if(selecionaPoligono() == 0) {
+            apagarPoligono();
+        }
+        break;
+    default:
+        break;
+    }
+    glutPostRedisplay();
 }
 
-void init (){
-    glClearColor(1.0,1.0,1.0,0.0);
-
-    glMatrixMode(GL_PROJECTION);
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-
-
-}
 //Função para selecionar um ponto.
 float selecX;
 float selecY;
 int selecionaPonto() {
     float mx = mousex;
     float my = mousey;
-    float t = 0.2;
+    float t = 0.01;
     for(int i = 0; i < qtd_pontos; i++) {
         if(mx <= pontos[i].x + t && mx >= pontos[i].x - t) {
             if(my <= pontos[i].y + t && my >= pontos[i].y - t) {
@@ -305,7 +321,7 @@ void transPonto() {
         }
     }
 }
-
+// FUNCAO DE TRANSLAÇAO DO POLIGONO
 void TransPoli(){
 
     float centroideX = 0;
@@ -377,7 +393,8 @@ void TransPoli(){
             glutPostRedisplay();
     }
 }
-float fatE;
+// FUNCAO DE ESCALA DO POLIGONO
+
 void Escalpoli(){
     float centroideX = 0;
     float centroideY = 0;
@@ -456,7 +473,7 @@ void Escalpoli(){
             glutPostRedisplay();
     }
 }
-float fatR;
+// FUNCAO DE ROTACAO DO POLIGONO
 void Rotpoli(){
     float centroideX = 0;
     float centroideY = 0;
@@ -539,10 +556,6 @@ void Rotpoli(){
 
 }
 
-
-
-
-
 //Função para apagar um ponto
 void limparPontos() {
     Ponto newpontos[100];
@@ -590,30 +603,7 @@ void apagarPoligono(){
     glutPostRedisplay();
 
 }
-void teclado(int key, int x, int y) {
-    switch (key)
-    {
-    case GLUT_KEY_UP:
-        fatE = 1.1;
-        Escalpoli();
-        break;
-    case GLUT_KEY_DOWN:
-        fatE = 0.9;
-        Escalpoli();
-        break;
-    case GLUT_KEY_RIGHT:
-        fatR = -0.4;
-        Rotpoli();
-        break;
-    case GLUT_KEY_LEFT:
-        fatR = 0.4;
-        Rotpoli();
-        break;
-    default:
-        break;
-    }
-    glutPostRedisplay();
-}
+
 //MENUS
 void sair() {exit(0);}
 
@@ -633,78 +623,46 @@ void menuFormas(int opcao) {
             break;
     }
 }
-
-void menuTransladar(int opcao) {
-        switch(opcao) {
-        case 1:
-            transPonto();
-            printf("Transladou o ponto\n");
-            break;
-        case 2:
-            printf("Transladou a reta\n");
-            break;
-        case 3:
-            TransPoli();
-            printf("Transladou o poligono\n");
-            break;
-    }
-}
-
-void menuApaga(int opcao) {
-        switch(opcao) {
-        case 1:
-            limparPontos();
-            printf("Apagou o ponto\n");
-            break;
-        case 2:
-            printf("Apagou a reta\n");
-            break;
-        case 3:
-            apagarPoligono();
-            printf("Apagou o poligono\n");
-            break;
-    }
-}
-
 void mainMenu(int valor) {
 	switch (valor)
 	{
 	case 0:
 		sair();
 		break;
-	case 1:
-		break;
-	case 2:
-
-		break;
-	case 3:
-
-		break;
-	}
+    }
 }
 
+// MENU PRINCIPAL
 void menu() {
     int menu1 = glutCreateMenu(menuFormas);
     glutAddMenuEntry("ponto", 1);
     glutAddMenuEntry("reta", 2);
     glutAddMenuEntry("poligono", 3);
 
-    int menu2 = glutCreateMenu(menuTransladar);
-    glutAddMenuEntry("ponto", 1);
-    glutAddMenuEntry("reta", 2);
-    glutAddMenuEntry("poligono", 3);
-
-    int menu6 = glutCreateMenu(menuApaga);
-    glutAddMenuEntry("ponto", 1);
-    glutAddMenuEntry("reta", 2);
-    glutAddMenuEntry("poligono", 3);
-
     int menuMain = glutCreateMenu(mainMenu);
     glutAddSubMenu("Desenhar", menu1);
-    glutAddSubMenu("Transladar", menu2);
-	glutAddSubMenu("Apagar", menu6);
 	glutAddMenuEntry("Sair", 0);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
+void display (void){
+    glClear(GL_COLOR_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    desenhaPonto();
+    desenhaReta();
+    desenhaPoligono();
+
+    glFlush();
+
+}
+
+void init (){
+    glClearColor(1.0,1.0,1.0,0.0);
+
+    glMatrixMode(GL_PROJECTION);
+    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
 }
 
 int main(int argc, char** argv){
@@ -719,6 +677,7 @@ int main(int argc, char** argv){
     glutMouseFunc(getMouse);
     glutMotionFunc(motion_callback);
     glutSpecialFunc(teclado);
+    glutKeyboardFunc(GerenciaTeclado);
     glutDisplayFunc(display);
     menu();
     glutMainLoop();
