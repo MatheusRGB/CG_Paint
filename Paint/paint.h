@@ -29,7 +29,7 @@ void motion_callback(int, int);
 
 //FUNCOES PARA SELECAO DAS FORMAS
 int selecionaPonto();
-int selecionaReta(); // sem implementacao
+int selecionaReta(); 
 int selecionaPoligono();
 
 //FUNCOES PARA TRANSLACAO DAS FORMAS
@@ -47,7 +47,7 @@ void Rotpoli();
 
 //FUNCOES PARA APAGAR AS FORMAS
 void limparPontos();
-void apagarReta(); // sem implementacao
+void apagarReta(); 
 void apagarPoligono();
 
 //FUNCOES RELACIONADAS AO TECLADO
