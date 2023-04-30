@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <GL/glut.h>
+#include <math.h>
 
 //Estrutura do ponto
 typedef struct{
@@ -223,6 +224,7 @@ int selecionaPonto(float px, float py, float mx, float my, float t) {
     }
     return 0;
 }
+
 //Função para selecionar um poligono, diz se está dentro ou fora.
 int intersec = 0;
 int selectPoligon;
@@ -231,10 +233,12 @@ int selecionaPoligono() {
     float mx = mousex;
     float my = mousey;
     int aux = 0;
+
     for(int i = 0; i < qtd_poligonos; i++){
         if(aux == 1){
             break;
         }
+
         for(int j = 0; j < qtd_pontos_poligonos[i]; j++){
             for( int k = 0; k < qtd_pontos_poligonos[i]; k++){
                 if(((poligonos[i][j].x > mx && poligonos[i][k].x > mx) && ((poligonos[i][j].y > my && poligonos[i][k].y < my) || (poligonos[i][j].y < my && poligonos[i][k].y > my)))) {
@@ -261,25 +265,280 @@ int selecionaPoligono() {
     return 0;
 
 }
-//função para transladar um ponto (NAO ESTA FUNCIONANDO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
+//função para transladar um ponto (Por click).
 void transPonto() {
-    //int verifica = selecionaPonto(pontos->x, pontos->y, mousex, mousey, 0.02);
-    Ponto newponto[100];
-    int j = 0;
 
     for (int i = 0; i < qtd_pontos; i++){
         if ((pontos[i].x == selecX) && (pontos[i].y == selecY)){
-            newponto[j].x = pontos[i].x + transX;
-            newponto[j].y = pontos[i].y + transY;
-            j++;
+            float offX = transX - pontos[i].x;
+            float offY = transY - pontos[i].y;
+
+           float MatrizT[3][3] = {
+           {1,0,offX},
+           {0,1,offY},
+           {0,0,   1}
+           };
+
+           float MatrizP[3][1] = {
+           {pontos[i].x},
+           {pontos[i].y},
+           {     1    }
+           };
+
+           float MatrizR[3][1];
+
+           for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 1; j++) {
+                    MatrizR[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizR[i][j] += MatrizT[i][k] * MatrizP[k][j];
+                    }
+                }
+            }
+
+            pontos[i].x = MatrizR[0][0];
+            pontos[i].y = MatrizR[1][0];
+            glutPostRedisplay();
         }
     }
-    for(int i = 0; i < qtd_pontos; i++){
-        pontos[i].x = newponto[i].x;
-        pontos[i].y = newponto[i].y;
-    }
-    glutPostRedisplay();
 }
+
+void TransPoli(){
+
+    float centroideX = 0;
+    float centroideY = 0;
+    for(int i =0; i < qtd_pontos_poligonos[selectPoligon]; i++){
+
+        centroideX = centroideX + poligonos[selectPoligon][i].x;
+        centroideY = centroideY + poligonos[selectPoligon][i].y;
+    }
+
+    centroideX = centroideX/(float)qtd_pontos_poligonos[selectPoligon];
+    centroideY = centroideY/(float)qtd_pontos_poligonos[selectPoligon];
+    //printf("Centroide x: %.2f", centroideX);
+
+
+    int window_width = glutGet(GLUT_WINDOW_WIDTH);
+    int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+    /*
+    centroideX = ((float)centroideX / (float)window_width - 0.5) * 2.0;
+    centroideY = ((float)(window_height - centroideY) / (float)window_height - 0.5) * 2.0;
+    */
+
+    for(int n =0; n < qtd_pontos_poligonos[selectPoligon]; n++){
+
+        float offX = mousex - centroideX;
+        float offY = mousey - centroideY;
+
+        printf("Ponto selecionado: %.2f, %.2f\n",poligonos[selectPoligon][n].x, poligonos[selectPoligon][n].y );
+        printf("ponto destino: %.2f, %.2f\n", transX, transY);
+        printf("OffX: %.2f, offy: %.2f\n", offX, offY);
+
+        float MatrizT[3][3] = {
+           {1,0,offX},
+           {0,1,offY},
+           {0,0,   1}
+           };
+
+        float MatrizP[3][1] = {
+           {  (poligonos[selectPoligon][n].x)  },
+           {  (poligonos[selectPoligon][n].y)  },
+           {     1    }
+           };
+
+        float MatrizR[3][1];
+
+        for(int i = 0; i < 3; i++) {
+                for (int j = 0; j < 1; j++) {
+                    MatrizR[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizR[i][j] += (MatrizT[i][k]) * (MatrizP[k][j]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < 3; i++) {
+                printf("%.2f\n", MatrizR[i][0]);
+            }
+
+            float newX = MatrizR[0][0];
+            float newY = MatrizR[1][0];
+
+            printf("X normal: %.2f\n", newX);
+            printf("Y normal: %.2f\n", newY);
+
+            poligonos[selectPoligon][n].x = newX;
+            poligonos[selectPoligon][n].y = newY;
+
+            printf("###\n");
+            glutPostRedisplay();
+    }
+}
+
+void Escalpoli(){
+    float centroideX = 0;
+    float centroideY = 0;
+
+    for(int i =0; i < qtd_pontos_poligonos[selectPoligon]; i++){
+
+        centroideX = centroideX + poligonos[selectPoligon][i].x;
+        centroideY = centroideY + poligonos[selectPoligon][i].y;
+    }
+
+    centroideX = centroideX/(float)qtd_pontos_poligonos[selectPoligon];
+    centroideY = centroideY/(float)qtd_pontos_poligonos[selectPoligon];
+
+    for(int n =0; n < qtd_pontos_poligonos[selectPoligon]; n++){
+
+        float offX = centroideX;
+        float offY = centroideY;
+
+        float MatrizT[3][3] = {
+           {1,0,offX},
+           {0,1,offY},
+           {0,0,   1}
+           };
+
+        float MatrizV[3][3] = {
+           {1,0,-offX},
+           {0,1,-offY},
+           {0,0,    1}
+           };
+
+        float MatrizE[3][3] = {
+           {1.5  ,0   ,   0},
+           {  0   ,1.5,   0},
+           {0     ,0   ,   1}
+           };
+
+        float MatrizP[3][1] = {
+           {  (poligonos[selectPoligon][n].x)},
+           {  (poligonos[selectPoligon][n].y)},
+           {     1    }
+           };
+
+        float MatrizR[3][1];
+        float MatrizR2[3][3];
+        float MatrizR3[3][3];
+
+        for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizR2[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizR2[i][j] += MatrizT[i][k] * MatrizE[k][j];
+                    }
+                }
+            }
+
+        for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizR3[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizR3[i][j] += MatrizR2[i][k] * MatrizV[k][j];
+                    }
+                }
+            }
+
+        for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 1; j++) {
+                    MatrizR[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizR[i][j] += MatrizR3[i][k] * MatrizP[k][j];
+                    }
+                }
+            }
+
+            poligonos[selectPoligon][n].x = (MatrizR[0][0]);
+            poligonos[selectPoligon][n].y = (MatrizR[1][0]);
+            glutPostRedisplay();
+    }
+}
+
+void Rotpoli(){
+    float centroideX = 0;
+    float centroideY = 0;
+
+    for(int i =0; i < qtd_pontos_poligonos[selectPoligon]; i++){
+
+        centroideX = centroideX + poligonos[selectPoligon][i].x;
+        centroideY = centroideY + poligonos[selectPoligon][i].y;
+    }
+
+    centroideX = centroideX/(float)qtd_pontos_poligonos[selectPoligon];
+    centroideY = centroideY/(float)qtd_pontos_poligonos[selectPoligon];
+
+     for(int n =0; n < qtd_pontos_poligonos[selectPoligon]; n++){
+
+        float offX = centroideX;
+        float offY = centroideY;
+
+        float MatrizT[3][3] = {
+           {1,0,offX},
+           {0,1,offY},
+           {0,0,   1}
+           };
+
+        float MatrizV[3][3] = {
+           {1,0,-offX},
+           {0,1,-offY},
+           {0,0,    1}
+           };
+
+        float MatrizRT[3][3] = {
+           {cos(10)  ,-sin(10),   0},
+           {sin(10)  ,cos(10),    0},
+           {0        ,0      ,    1}
+           };
+
+        float MatrizP[3][1] = {
+           {  (poligonos[selectPoligon][n].x)},
+           {  (poligonos[selectPoligon][n].y)},
+           {     1    }
+           };
+
+        float MatrizR[3][1];
+        float MatrizR2[3][3];
+        float MatrizR3[3][3];
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                MatrizR2[i][j] = 0;
+                for (int k = 0; k < 3; k++) {
+                    MatrizR2[i][j] += MatrizT[i][k] * MatrizRT[k][j];
+                }
+            }
+        }
+
+        for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    MatrizR3[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizR3[i][j] += MatrizR2[i][k] * MatrizV[k][j];
+                    }
+                }
+            }
+
+        for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 1; j++) {
+                    MatrizR[i][j] = 0;
+                    for (int k = 0; k < 3; k++) {
+                        MatrizR[i][j] += MatrizR3[i][k] * MatrizP[k][j];
+                    }
+                }
+            }
+
+        poligonos[selectPoligon][n].x = (MatrizR[0][0]);
+        poligonos[selectPoligon][n].y = (MatrizR[1][0]);
+        glutPostRedisplay();
+
+
+     }
+
+}
+
+
+
+
 
 //Função para apagar um ponto
 void limparPontos() {
@@ -303,9 +562,9 @@ void limparPontos() {
     glutPostRedisplay();
 }
 
+//Função para apagar um poligono.
 void apagarPoligono(){
     Ponto newpoligono[100][100];
-    int j = 0;
 
     for(int i = 0; i < qtd_poligonos; i++){
         for(int j = 0; j < qtd_pontos_poligonos[i]; j++){
@@ -325,6 +584,7 @@ void apagarPoligono(){
 
     //qtd_poligonos--;
     qtd_pontos_poligonos[selectPoligon] = 0;
+    glutPostRedisplay();
 
 }
 //MENUS
@@ -376,6 +636,7 @@ void menuTransladar(int opcao) {
             printf("Transladou a reta\n");
             break;
         case 3:
+            TransPoli();
             printf("Transladou o poligono\n");
             break;
     }
@@ -386,6 +647,7 @@ void menuRotacionar(int opcao) {
             printf("Rotacionou a reta\n");
             break;
         case 2:
+            Rotpoli();
             printf("Rotacionou o poligono\n");
             break;
     }
@@ -396,6 +658,7 @@ void menuEscalonar(int opcao) {
             printf("Escalonou a reta\n");
             break;
         case 2:
+            Escalpoli();
             printf("Escalonou o poligono\n");
             break;
     }
