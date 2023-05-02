@@ -263,8 +263,14 @@ int selecionaPonto() {
 int selecionaReta() {
     float mx = mousex;
     float my = mousey;
-    float t = 0.01;
+    float t = 0.03;
     for(int i = 0; i < qtd_retas; i++) {
+
+        int E = 0;
+        int D = 0;
+        int A = 0;
+        int B = 0;
+
         if((mx <= retas[i].inicio.x + t && mx >= retas[i].inicio.x - t) || (mx <= retas[i].fim.x + t && mx >= retas[i].fim.x - t)) {
             if((my <= retas[i].inicio.y + t && my >= retas[i].inicio.y - t) || (my <= retas[i].fim.y + t && my >= retas[i].fim.y - t)) {
                 printf("reta selecionada: (%.2f, %.2f) ate (%.2f, %.2f)\n", retas[i].inicio.x, retas[i].inicio.y, retas[i].fim.x, retas[i].fim.y);
@@ -272,8 +278,55 @@ int selecionaReta() {
                 return 1;
             }
         }else{
-            //outro caso
+            //Esquerda/Direta
+            if(retas[i].inicio.x < mx - t){
+                if(retas[i].fim.x > mx + t){
+                    E = 1, D = 1;
+                }
+            }
+            //Direita/Esquerda
+            if(retas[i].inicio.x > mx + t){
+                if(retas[i].fim.x < mx - t){
+                    E =1, D = 1;
+                }
+            }
+
+            //Baixo/Cima
+            if(retas[i].inicio.y < my - t){
+                if(retas[i].fim.y > my + t){
+                    B = 1, A = 1;
+                }
+            }
+            //Cima/Baixo
+            else if(retas[i].inicio.y > my + t){
+                if(retas[i].fim.y < my - t ){
+                    A = 1, B = 1;
+                }
+            }
+
+            if(E==1 && D==1){
+                if((my <= retas[i].inicio.y + t && my >= retas[i].inicio.y - t) || (my <= retas[i].fim.y + t && my >= retas[i].fim.y - t)){
+                    printf("reta selecionada: (%.2f, %.2f) ate (%.2f, %.2f)\n", retas[i].inicio.x, retas[i].inicio.y, retas[i].fim.x, retas[i].fim.y);
+                    selecReta = i;
+                    E = 0;
+                    D = 0;
+                    return 1;
+                }
+            }
+
+            else if(A==1 && B==1){
+                if(((mx <= retas[i].inicio.x + t && mx >= retas[i].inicio.x - t) || (mx <= retas[i].fim.x + t && mx >= retas[i].fim.x - t))){
+                    printf("reta selecionada: (%.2f, %.2f) ate (%.2f, %.2f)\n", retas[i].inicio.x, retas[i].inicio.y, retas[i].fim.x, retas[i].fim.y);
+                    selecReta = i;
+                    B = 0;
+                    A = 0;
+                    return 1;
+                }
+            }
+
+
         }
+
     }
     return 0;
 }
