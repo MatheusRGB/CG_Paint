@@ -22,7 +22,7 @@ int qtd_pontos_poligonos[100] = {0};
 int qtd_poligonos = 0;
 Ponto poligonos[100][100];
 
-//Fun  o para adicionar um ponto no vetor
+//Função para adicionar um ponto no vetor
 void addPontos(float x, float y){
     pontos[qtd_pontos].x = x;
     pontos[qtd_pontos].y = y;
@@ -32,7 +32,7 @@ void addPontos(float x, float y){
 
 }
 
-//Fun  o para adicionar reta no vetor
+//Função para adicionar reta no vetor
 void addReta(float x, float y, float x2, float y2){
     retas[qtd_retas].inicio.x = x;
     retas[qtd_retas].inicio.y = y;
@@ -93,7 +93,7 @@ void desenhaPoligono(){
     //glEnd();
 }
 
-//Funçoes relacionadas com o mouse
+//Funçoes de click do mouse.
 int OP = 0, mousepressionado = 0;
 float mousex, mousey, transX, transY;
 int selectPoligon;
@@ -260,6 +260,7 @@ int selecionaPonto() {
     return 0;
 }
 
+//Função para selecionar reta.
 int selecionaReta() {
     float mx = mousex;
     float my = mousey;
@@ -367,7 +368,7 @@ int selecionaPoligono() {
     return 0;
 
 }
-//função para transladar um ponto (Por click).
+//função para transladar um ponto.
 void transPonto() {
 
     for (int i = 0; i < qtd_pontos; i++){
