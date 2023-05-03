@@ -1,6 +1,8 @@
 # CG_Paint
 Projeto "Paint"
 
+Elias Osbony e Matheus Yago
+
 # INSTRUÇÕES
 
 ## DESENHAR:
