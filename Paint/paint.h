@@ -29,16 +29,16 @@ void motion_callback(int, int);
 
 //FUNCOES PARA SELECAO DAS FORMAS
 int selecionaPonto();
-int selecionaReta();
+int selecionaReta(); 
 int selecionaPoligono();
 
 //FUNCOES PARA TRANSLACAO DAS FORMAS
 void transPonto();
-void transReta();
+void transReta(); 
 void TransPoli();
 
 //FUNCOES PARA ESCALAR AS FORMAS
-void Escalreta();
+void Escalreta(); 
 void Escalpoli();
 
 //FUNCOES PARA ROTACIONAR AS FORMAS
@@ -47,7 +47,7 @@ void Rotpoli();
 
 //FUNCOES PARA APAGAR AS FORMAS
 void limparPontos();
-void apagarReta();
+void apagarReta(); 
 void apagarPoligono();
 
 //FUNCOES RELACIONADAS AO TECLADO
