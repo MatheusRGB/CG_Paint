@@ -485,24 +485,14 @@ void TransPoli(){
 
     centroideX = centroideX/(float)qtd_pontos_poligonos[selectPoligon];
     centroideY = centroideY/(float)qtd_pontos_poligonos[selectPoligon];
-    //printf("Centroide x: %.2f", centroideX);
-
 
     int window_width = glutGet(GLUT_WINDOW_WIDTH);
     int window_height = glutGet(GLUT_WINDOW_HEIGHT);
-    /*
-    centroideX = ((float)centroideX / (float)window_width - 0.5) * 2.0;
-    centroideY = ((float)(window_height - centroideY) / (float)window_height - 0.5) * 2.0;
-    */
 
     for(int n =0; n < qtd_pontos_poligonos[selectPoligon]; n++){
 
         float offX = mousex - centroideX;
         float offY = mousey - centroideY;
-
-        printf("Ponto selecionado: %.2f, %.2f\n",poligonos[selectPoligon][n].x, poligonos[selectPoligon][n].y );
-        printf("ponto destino: %.2f, %.2f\n", transX, transY);
-        printf("OffX: %.2f, offy: %.2f\n", offX, offY);
 
         float MatrizT[3][3] = {
            {1,0,offX},
@@ -534,13 +524,9 @@ void TransPoli(){
             float newX = MatrizR[0][0];
             float newY = MatrizR[1][0];
 
-            printf("X normal: %.2f\n", newX);
-            printf("Y normal: %.2f\n", newY);
-
             poligonos[selectPoligon][n].x = newX;
             poligonos[selectPoligon][n].y = newY;
 
-            printf("###\n");
             glutPostRedisplay();
     }
 }
