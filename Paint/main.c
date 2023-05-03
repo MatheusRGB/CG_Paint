@@ -47,7 +47,7 @@ void addReta(float x, float y, float x2, float y2){
 void addPoligono(float x, float y){
     poligonos[qtd_poligonos][qtd_pontos_poligonos[qtd_poligonos]].x = x;
     poligonos[qtd_poligonos][qtd_pontos_poligonos[qtd_poligonos]].y = y;
-
+    glutPostRedisplay();
     printf("Poligono %d adicionado com ponto x: %.2f \n", qtd_poligonos, poligonos[qtd_poligonos][qtd_pontos_poligonos[qtd_poligonos]].x);
 
     qtd_pontos_poligonos[qtd_poligonos]++;
@@ -80,7 +80,6 @@ void desenhaReta(){
 //Desenha todas os poligonos do vetor
 void desenhaPoligono(){
     glPointSize(5.0);
-    //glBegin(GL_POLYGON);
     for(int i = 0; i < qtd_poligonos; i++){
         glBegin(GL_POLYGON);
         for(int j = 0; j < qtd_pontos_poligonos[i]; j++){
@@ -90,10 +89,10 @@ void desenhaPoligono(){
         glEnd();
 
     }
-    //glEnd();
+    
 }
 
-//Funçoes de click do mouse.
+//Funçoes para click do mouse
 int OP = 0, mousepressionado = 0;
 float mousex, mousey, transX, transY;
 int selectPoligon;
@@ -111,13 +110,14 @@ void getMouse(int button, int state, int x, int y){
         selecionaPonto();
         selecionaReta();
         selecionaPoligono();
+
     } else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
         mousepressionado = 0;
         transPonto();
     }
     if(button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
         if(OP == 0){
-            printf("(%.2f, %.2f)", mousex, mousey);
+            printf("Coordenadas atuais: (%.2f, %.2f)", mousex, mousey);
             selectPoligon = -1;
             selecReta = -1;
         }
@@ -141,7 +141,6 @@ void getMouse(int button, int state, int x, int y){
             float window_y = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
 
             addPontos(window_x, window_y);
-            //glutPostRedisplay();
         }
     } else if(OP == 2) {
         if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
@@ -168,9 +167,9 @@ void getMouse(int button, int state, int x, int y){
 
             float window_x = ((float)x / (float)window_width - 0.5) * 2.0;
             float window_y = ((float)(window_height - y) / (float)window_height - 0.5) * 2.0;
-
+            
             addPoligono(window_x, window_y);
-            //glutPostRedisplay();
+            
         }
     }
 }
@@ -368,7 +367,8 @@ int selecionaPoligono() {
     return 0;
 
 }
-//função para transladar um ponto.
+
+//função para transladar um ponto (Por click).
 void transPonto() {
 
     for (int i = 0; i < qtd_pontos; i++){
@@ -495,6 +495,10 @@ void TransPoli(){
         float offX = mousex - centroideX;
         float offY = mousey - centroideY;
 
+        printf("Ponto selecionado: %.2f, %.2f\n",poligonos[selectPoligon][n].x, poligonos[selectPoligon][n].y );
+        printf("ponto destino: %.2f, %.2f\n", transX, transY);
+        printf("OffX: %.2f, offy: %.2f\n", offX, offY);
+
         float MatrizT[3][3] = {
            {1,0,offX},
            {0,1,offY},
@@ -525,9 +529,13 @@ void TransPoli(){
             float newX = MatrizR[0][0];
             float newY = MatrizR[1][0];
 
+            printf("X normal: %.2f\n", newX);
+            printf("Y normal: %.2f\n", newY);
+
             poligonos[selectPoligon][n].x = newX;
             poligonos[selectPoligon][n].y = newY;
 
+            printf("###\n");
             glutPostRedisplay();
     }
 }
@@ -649,8 +657,6 @@ void Escalreta() {
 
 }
 
-
-
 // FUNCAO DE ESCALA DO POLIGONO
 void Escalpoli(){
     float centroideX = 0;
@@ -731,7 +737,7 @@ void Escalpoli(){
     }
 }
 
-
+//Função para rotacionar reta;
 void Rotreta(){
     float centroideX = 0;
     float centroideY = 0;
@@ -851,11 +857,7 @@ void Rotreta(){
             glutPostRedisplay();
         }
     }
-
-
-
 }
-
 
 // FUNCAO DE ROTACAO DO POLIGONO
 void Rotpoli(){
@@ -962,6 +964,7 @@ void limparPontos() {
     glutPostRedisplay();
 }
 
+//Função para apagar reta.
 void apagarReta() {
     Reta newretas[100];
     int j = 0;
@@ -1005,7 +1008,6 @@ void apagarPoligono(){
         }
     }
 
-    //qtd_poligonos--;
     qtd_pontos_poligonos[selectPoligon] = 0;
     glutPostRedisplay();
 
@@ -1060,7 +1062,6 @@ void display (void){
     desenhaPonto();
     desenhaReta();
     desenhaPoligono();
-
     glFlush();
 
 }
